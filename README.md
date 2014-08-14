@@ -21,6 +21,10 @@ cp config/config.yml.dist config/config.yml
 
 3) Edit the config file with your facebook informations
 
+```
+vim config/config.yml
+```
+
 4) Install dependencies
 
 ```
