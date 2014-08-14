@@ -3,8 +3,8 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-use TinderFun\Command\BotCommand;
-use TinderFun\Console\Application;
+use Rednit\Command\BotCommand;
+use Rednit\Console\Application;
 
 $application = new Application();
 $application->run();

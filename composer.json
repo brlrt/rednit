@@ -1,5 +1,5 @@
 {
-    "name": "matt/tinderfun",
+    "name": "matts2cant/rednit",
     "require": {
         "symfony/console": "2.6.*@dev",
         "symfony/yaml": "2.6.*@dev",

@@ -1,6 +1,6 @@
 <?php
 
-namespace TinderFun\Command;
+namespace Rednit\Command;
 
 use Guzzle\Http\Client;
 use Symfony\Component\Console\Command\Command;
@@ -63,15 +63,19 @@ class BotCommand extends Command
             $output->writeln('- ' . $location['error']);
         }
 
-        // Fetching recommendations
-        $recs = $this->getRecommendations();
-        foreach ($recs as $user) {
-            $output->writeln(sprintf("- Liking <info>%s</info>", $user['name']));
+        for ($i = 0; $i < $this->config['iterations']; $i++) {
+            // Fetching recommendations
+            $recs = $this->getRecommendations();
+            $output->writeln(sprintf("- fetched <info>%s</info> recommendations.", count($recs)));
 
-            // Liking the user
-            $this->likeUser($user);
+            foreach ($recs as $user) {
+                $output->writeln(sprintf("- Liking <info>%s</info>", $user['name']));
 
-            sleep(2);
+                // Liking the user
+                $this->likeUser($user);
+
+                sleep(2);
+            }
         }
     }
 

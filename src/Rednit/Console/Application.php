@@ -1,8 +1,8 @@
 <?php
-namespace TinderFun\Console;
+namespace Rednit\Console;
 
 use Symfony\Component\Console\Application as BaseApplication;
-use TinderFun\Command\BotCommand;
+use Rednit\Command\BotCommand;
 
 class Application extends BaseApplication
 {
