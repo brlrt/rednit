@@ -1,0 +1,17 @@
+{
+    "name": "matt/tinderfun",
+    "require": {
+        "symfony/console": "2.6.*@dev",
+        "symfony/yaml": "2.6.*@dev",
+        "guzzle/guzzle": "3.9.*@dev"
+    },
+    "authors": [
+        {
+            "name": "Matthieu de Canteloube",
+            "email": "matts2cant@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "": "src/" }
+    }
+}
