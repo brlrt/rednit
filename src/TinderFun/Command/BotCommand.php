@@ -31,8 +31,8 @@ class BotCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('profit')
-            ->setDescription('Farm tinder')
+            ->setName('launch')
+            ->setDescription('Tinder magics')
         ;
     }
 
@@ -58,8 +58,9 @@ class BotCommand extends Command
 
         // Update location from config file
         $location = $this->updateLocation();
+        $output->writeln("- Updating geoloc.");
         if (isset($location['error'])) {
-            $output->writeln($location['error']);
+            $output->writeln('- ' . $location['error']);
         }
 
         // Fetching recommendations

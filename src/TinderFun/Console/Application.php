@@ -31,7 +31,7 @@ EOT;
     {
         parent::__construct();
 
-        $this->setName("TinderFun");
+        $this->setName("Rednit");
         $this->setVersion("0.1");
 
         $this->registerCommands();
