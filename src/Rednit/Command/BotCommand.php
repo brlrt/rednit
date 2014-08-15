@@ -210,7 +210,11 @@ class BotCommand extends Command
         }
 
         if (!is_null($this->logger)) {
-            $this->logger->info(sprintf('Liked user %s', $user['name']));
+            $this->logger->info(sprintf('Liked user %s', $user['name']), [
+                'name' => $user['name'],
+                'bio' => $user['bio'],
+                'raw_data' => json_encode($user),
+            ]);
         }
     }
 
