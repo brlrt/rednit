@@ -69,12 +69,13 @@ class BotCommand extends Command
             $output->writeln(sprintf("- fetched <info>%s</info> recommendations.", count($recs)));
 
             foreach ($recs as $user) {
-                $output->writeln(sprintf("- Liking <info>%s</info>", $user['name']));
-
                 // Liking the user
+                $output->writeln(sprintf("- Liking <info>%s</info> <<comment>%s</comment>>", $user['name'], $user['_id']));
                 $this->likeUser($user);
 
-                sleep(2);
+                // Waiting before next api call
+                $output->writeln(sprintf("- waiting <info>%s</info> seconds", $this->config['waiting_time']));
+                sleep($this->config['waiting_time']);
             }
         }
     }
@@ -178,7 +179,7 @@ class BotCommand extends Command
 
         $data = $response->json();
 
-        return $data['results'];
+        return isset($data['results']) ? $data['results'] : [];
     }
 
     /**
