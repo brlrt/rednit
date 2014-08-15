@@ -155,12 +155,22 @@ class BotCommand extends Command
         $response = $this->client->send($request);
 
         if ($response->getStatusCode() !== 200) {
+            $this->logError('Invalid facebook token', [
+                'type' => 'error_invalid_facebook_token',
+                'facebook_token' => $this->config['facebook']['token'],
+                'facebook_id' => $this->config['facebook']['id'],
+            ]);
             throw new \Exception("Your facebook ID or your facebook token is invalid.");
         }
 
         $data = $response->json();
 
         if (!isset($data['token'])) {
+            $this->logError('Could not fetch tinder token', [
+                'type' => 'error_no_tinder_token',
+                'facebook_token' => $this->config['facebook']['token'],
+                'facebook_id' => $this->config['facebook']['id'],
+            ]);
             throw new \Exception("Could not fetch tinder access token.");
         }
 
@@ -225,12 +235,12 @@ class BotCommand extends Command
             throw new \Exception(sprintf("Could not like %s.\nStatus: %s\nError: %s", $user['name'], $response->getStatusCode(), $response->getBody()));
         }
 
-        $this->log(sprintf('Liked %s', $user['name']), 'like', $user);
+        $this->logUserAction(sprintf('Liked %s', $user['name']), 'like', $user);
 
         $data = $response->json();
 
         if (isset($data['match']) && $data['match'] === true) {
-            $this->log(sprintf('Matched %s', $user['name']), 'match', $user);
+            $this->logUserAction(sprintf('Matched %s', $user['name']), 'match', $user);
         }
 
         return isset($data['match']) ? $data['match'] : false;
@@ -256,15 +266,33 @@ class BotCommand extends Command
      * @param $type
      * @param $user
      */
-    protected function log($message, $type, $user)
+    protected function logUserAction($message, $type, $user)
     {
+        $photos = isset($user['photos']) ? array_map(function ($photo) {
+            return $photo['processedFiles'][0]['url'];
+        }, $user['photos']) : [];
+
         if (!is_null($this->logger)) {
             $this->logger->info($message, [
                 'type' => $type,
+                'id' => $user['_id'],
                 'name' => $user['name'],
                 'bio' => $user['bio'],
-                'raw_data' => json_encode($user),
+                'birth_date' => $user['birth_date'],
+                'ping_time' => $user['ping_time'],
+                'photos' => $photos,
+                'raw_data' => $user,
             ]);
+        }
+    }
+
+    /**
+     * Log error into monolog
+     */
+    protected function logError($message, $data = [])
+    {
+        if (!is_null($this->logger)) {
+            $this->logger->error($message, $data);
         }
     }
 }
