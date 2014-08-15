@@ -196,9 +196,10 @@ class BotCommand extends Command
     }
 
     /**
-     * Like User
+     * Like user
      *
      * @param $user
+     * @return array
      * @throws \Exception
      */
     protected function likeUser($user)
@@ -211,13 +212,15 @@ class BotCommand extends Command
             throw new \Exception(sprintf("Could not like %s.\nStatus: %s\nError: %s", $user['name'], $response->getStatusCode(), $response->getBody()));
         }
 
-        if (!is_null($this->logger)) {
-            $this->logger->info(sprintf('Liked user %s', $user['name']), [
-                'name' => $user['name'],
-                'bio' => $user['bio'],
-                'raw_data' => json_encode($user),
-            ]);
+        $this->log(sprintf('Liked %s', $user['name']), 'like', $user);
+
+        $data = $response->json();
+
+        if (isset($data['match']) && $data['match'] === true) {
+            $this->log(sprintf('Matched %s', $user['name']), 'match', $user);
         }
+
+        return $data;
     }
 
     /**
@@ -230,6 +233,25 @@ class BotCommand extends Command
             $formatter = new LogstashFormatter('rednit');
             $redisHandler->setFormatter($formatter);
             $this->logger = new Logger('logstash', [$redisHandler]);
+        }
+    }
+
+    /**
+     * Log message into monolog for a given user
+     *
+     * @param $message
+     * @param $type
+     * @param $user
+     */
+    protected function log($message, $type, $user)
+    {
+        if (!is_null($this->logger)) {
+            $this->logger->info($message, [
+                'type' => $type,
+                'name' => $user['name'],
+                'bio' => $user['bio'],
+                'raw_data' => json_encode($user),
+            ]);
         }
     }
 }
