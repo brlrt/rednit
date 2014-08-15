@@ -71,17 +71,20 @@ class BotCommand extends Command
 
         // Update location from config file
         $location = $this->updateLocation();
-        $output->writeln("- Updating geoloc.");
         if (isset($location['error'])) {
-            $output->writeln('- ' . $location['error']);
+            $output->writeln(sprintf("- Updating location: <info>%s</info>", $location['error']));
+        } else {
+            $output->writeln("- Updating location.");
         }
+
+        $count = 0;
+        $matched = 0;
 
         for ($i = 0; $i < $this->config['iterations']; $i++) {
             // Fetching recommendations
             $recs = $this->getRecommendations();
 
             if (count($recs) === 0) {
-                $output->writeln("- No recommendation fetched. Exiting.");
                 break;
             }
 
@@ -89,14 +92,18 @@ class BotCommand extends Command
 
             foreach ($recs as $user) {
                 // Liking the user
-                $output->writeln(sprintf("- Liking <info>%s</info> <<comment>%s</comment>>", $user['name'], $user['_id']));
-                $this->likeUser($user);
+                $output->writeln(sprintf("- Liking <info>%s</info> <<comment>%s</comment>>.", $user['name'], $user['_id']));
+                $hasMatched = $this->likeUser($user);
+
+                $count++;
+                $matched += $hasMatched ? 1 : 0;
 
                 // Waiting before next api call
-                $output->writeln(sprintf("- waiting <info>%s</info> seconds", $this->config['waiting_time']));
                 sleep($this->config['waiting_time']);
             }
         }
+
+        $output->writeln(sprintf("- Finished. <info>%s</info> user liked. <info>%s</info> matches.", $count, $matched));
     }
 
     /**
@@ -205,7 +212,7 @@ class BotCommand extends Command
      * Like user
      *
      * @param $user
-     * @return array
+     * @return boolean If the user matched
      * @throws \Exception
      */
     protected function likeUser($user)
@@ -226,7 +233,7 @@ class BotCommand extends Command
             $this->log(sprintf('Matched %s', $user['name']), 'match', $user);
         }
 
-        return $data;
+        return isset($data['match']) ? $data['match'] : false;
     }
 
     /**
