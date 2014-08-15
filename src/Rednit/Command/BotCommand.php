@@ -98,6 +98,10 @@ class BotCommand extends Command
                 $count++;
                 $matched += $hasMatched ? 1 : 0;
 
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $output->writeln(sprintf("- JSON error: <info>%s</info>.", json_last_error_msg()));
+                }
+
                 // Waiting before next api call
                 sleep($this->config['waiting_time']);
             }
