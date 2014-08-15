@@ -56,6 +56,8 @@ class BotCommand extends Command
         // Reading config file
         $this->parseConfig();
 
+        $output->writeln(sprintf("Launched REDNIT at <info>%s</info>", date("Y/m/d H:i:s")));
+
         // Create logger
         $this->createLogger();
 
