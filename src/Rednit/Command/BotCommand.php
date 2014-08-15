@@ -79,7 +79,13 @@ class BotCommand extends Command
         for ($i = 0; $i < $this->config['iterations']; $i++) {
             // Fetching recommendations
             $recs = $this->getRecommendations();
-            $output->writeln(sprintf("- fetched <info>%s</info> recommendations.", count($recs)));
+
+            if (count($recs) === 0) {
+                $output->writeln("- No recommendation fetched. Exiting.");
+                break;
+            }
+
+            $output->writeln(sprintf("- Fetched <info>%s</info> recommendations.", count($recs)));
 
             foreach ($recs as $user) {
                 // Liking the user
