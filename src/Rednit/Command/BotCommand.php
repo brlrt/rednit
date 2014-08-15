@@ -243,11 +243,11 @@ class BotCommand extends Command
 
         $data = $response->json();
 
-        if (isset($data['match']) && $data['match'] === true) {
+        if (isset($data['matched']) && $data['matched'] === true) {
             $this->logUserAction(sprintf('Matched %s', $user['name']), 'match', $user);
         }
 
-        return isset($data['match']) ? $data['match'] : false;
+        return isset($data['matched']) ? $data['matched'] : false;
     }
 
     /**
