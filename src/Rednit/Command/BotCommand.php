@@ -9,11 +9,19 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Parser;
+use Monolog\Logger;
+use Monolog\Handler\RedisHandler;
+use Monolog\Formatter\LogstashFormatter;
 
 class BotCommand extends Command
 {
     const TINDER_API_ENDPOINT = 'https://api.gotinder.com';
     const TINDER_USER_AGENT = 'Tinder/4.0.4 (iPhone; iOS 7.1; Scale/2.00)';
+
+    /**
+     * @var Logger
+     */
+    protected $logger;
 
     /**
      * @var Client
@@ -47,6 +55,9 @@ class BotCommand extends Command
     {
         // Reading config file
         $this->parseConfig();
+
+        // Create logger
+        $this->createLogger();
 
         // Creating Guzzle client
         $this->initClient();
@@ -196,6 +207,23 @@ class BotCommand extends Command
 
         if ($response->getStatusCode() !== 200) {
             throw new \Exception(sprintf("Could not like %s.\nStatus: %s\nError: %s", $user['name'], $response->getStatusCode(), $response->getBody()));
+        }
+
+        if (!is_null($this->logger)) {
+            $this->logger->info(sprintf('Liked user %s', $user['name']));
+        }
+    }
+
+    /**
+     * Create Redis logger
+     */
+    protected function createLogger()
+    {
+        if ($this->config['redis_log'] === true) {
+            $redisHandler = new RedisHandler(new \Predis\Client(), 'phplogs');
+            $formatter = new LogstashFormatter('rednit');
+            $redisHandler->setFormatter($formatter);
+            $this->logger = new Logger('logstash', [$redisHandler]);
         }
     }
 }

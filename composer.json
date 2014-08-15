@@ -3,7 +3,9 @@
     "require": {
         "symfony/console": "2.6.*@dev",
         "symfony/yaml": "2.6.*@dev",
-        "guzzle/guzzle": "3.9.*@dev"
+        "guzzle/guzzle": "3.9.*@dev",
+        "monolog/monolog": "1.11.*@dev",
+        "predis/predis": "1.1.*@dev"
     },
     "authors": [
         {
