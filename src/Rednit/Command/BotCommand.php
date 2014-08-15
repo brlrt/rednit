@@ -268,10 +268,6 @@ class BotCommand extends Command
      */
     protected function logUserAction($message, $type, $user)
     {
-        $photos = isset($user['photos']) ? array_map(function ($photo) {
-            return $photo['processedFiles'][0]['url'];
-        }, $user['photos']) : [];
-
         if (!is_null($this->logger)) {
             $this->logger->info($message, [
                 'type' => $type,
@@ -280,7 +276,6 @@ class BotCommand extends Command
                 'bio' => $user['bio'],
                 'birth_date' => $user['birth_date'],
                 'ping_time' => $user['ping_time'],
-                'photos' => $photos,
                 'raw_data' => $user,
             ]);
         }
