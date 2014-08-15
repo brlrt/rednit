@@ -42,5 +42,3 @@ Usage
 ```
 
 2) Lay back
-
-3) Get laid
