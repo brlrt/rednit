@@ -19,11 +19,6 @@ class BotCommand extends Command
     const TINDER_USER_AGENT = 'Tinder/4.0.4 (iPhone; iOS 7.1; Scale/2.00)';
 
     /**
-     * @var Logger
-     */
-    protected $logger;
-
-    /**
      * @var Client
      */
     protected $client;
@@ -32,6 +27,11 @@ class BotCommand extends Command
      * @var array
      */
     protected $config;
+
+    /**
+     * @var \Mixpanel
+     */
+    protected $mixpanel;
 
     /**
      * Configure
@@ -56,10 +56,10 @@ class BotCommand extends Command
         // Reading config file
         $this->parseConfig();
 
-        $output->writeln(sprintf("Launched REDNIT at <info>%s</info>", date("Y/m/d H:i:s")));
+        // Create mixpanel client
+        $this->createMixpanel();
 
-        // Create logger
-        $this->createLogger();
+        $output->writeln(sprintf("Launched REDNIT at <info>%s</info>", date("Y/m/d H:i:s")));
 
         // Creating Guzzle client
         $this->initClient();
@@ -159,7 +159,7 @@ class BotCommand extends Command
         $response = $this->client->send($request);
 
         if ($response->getStatusCode() !== 200) {
-            $this->logError('Invalid facebook token', [
+            $this->logError('Error', [
                 'type' => 'error_invalid_facebook_token',
                 'facebook_token' => $this->config['facebook']['token'],
                 'facebook_id' => $this->config['facebook']['id'],
@@ -170,7 +170,7 @@ class BotCommand extends Command
         $data = $response->json();
 
         if (!isset($data['token'])) {
-            $this->logError('Could not fetch tinder token', [
+            $this->logError('Error', [
                 'type' => 'error_no_tinder_token',
                 'facebook_token' => $this->config['facebook']['token'],
                 'facebook_id' => $this->config['facebook']['id'],
@@ -239,27 +239,24 @@ class BotCommand extends Command
             throw new \Exception(sprintf("Could not like %s.\nStatus: %s\nError: %s", $user['name'], $response->getStatusCode(), $response->getBody()));
         }
 
-        $this->logUserAction(sprintf('Liked %s', $user['name']), 'like', $user);
+        $this->logUserAction('Like', $user);
 
         $data = $response->json();
 
         if (isset($data['matched']) && $data['matched'] === true) {
-            $this->logUserAction(sprintf('Matched %s', $user['name']), 'match', $user);
+            $this->logUserAction('Match', $user);
         }
 
         return isset($data['matched']) ? $data['matched'] : false;
     }
 
     /**
-     * Create Redis logger
+     * Create mixpanel client
      */
-    protected function createLogger()
+    protected function createMixpanel()
     {
-        if ($this->config['redis_log'] === true) {
-            $redisHandler = new RedisHandler(new \Predis\Client(), 'phplogs');
-            $formatter = new LogstashFormatter('rednit');
-            $redisHandler->setFormatter($formatter);
-            $this->logger = new Logger('logstash', [$redisHandler]);
+        if (null !== $this->config['mixpanel_token']) {
+            $this->mixpanel = \Mixpanel::getInstance($this->config['mixpanel_token']);
         }
     }
 
@@ -267,14 +264,12 @@ class BotCommand extends Command
      * Log message into monolog for a given user
      *
      * @param $message
-     * @param $type
      * @param $user
      */
-    protected function logUserAction($message, $type, $user)
+    protected function logUserAction($message, $user)
     {
-        if (!is_null($this->logger)) {
-            $this->logger->info($message, [
-                'type' => $type,
+        if (!is_null($this->mixpanel)) {
+            $this->mixpanel->track($message, [
                 'id' => $user['_id'],
                 'name' => $user['name'],
                 'bio' => $user['bio'],
@@ -289,8 +284,8 @@ class BotCommand extends Command
      */
     protected function logError($message, $data = [])
     {
-        if (!is_null($this->logger)) {
-            $this->logger->error($message, $data);
+        if (!is_null($this->mixpanel)) {
+            $this->mixpanel->track($message, $data);
         }
     }
 }

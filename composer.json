@@ -5,7 +5,8 @@
         "symfony/yaml": "2.6.*@dev",
         "guzzle/guzzle": "3.9.*@dev",
         "monolog/monolog": "1.11.*@dev",
-        "predis/predis": "1.1.*@dev"
+        "predis/predis": "1.1.*@dev",
+        "mixpanel/mixpanel-php": "2.6.*"
     },
     "authors": [
         {
